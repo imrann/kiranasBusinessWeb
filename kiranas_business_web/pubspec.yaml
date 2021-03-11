@@ -32,10 +32,11 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  firebase_core: ^0.6.0
-  firebase_auth: ^0.19.0
+  firebase_core: ^0.7.0
+  firebase_auth: ^0.20.0  
   provider: any
   intl: ^0.16.1
+  http: ^0.12.2
   shared_preferences: ^0.5.7+3
   pin_code_fields: ^4.0.0
   progress_dialog: ^1.2.3
@@ -44,7 +45,7 @@ dev_dependencies:
   transparent_image: ^1.0.0
   image_picker: ^0.6.0+17   
   path: ^1.7.0 
-  firebase_storage: ^6.0.0 
+  
   image_cropper: ^1.0.2
   url_launcher: ^5.7.10
   flutter_web_image_picker: ^0.0.2

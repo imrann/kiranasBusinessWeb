@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -184,25 +183,25 @@ class _ImageProcessingState extends State<ImageProcessing> {
   }
 
   Future uploadFile(BuildContext context) async {
-    firebase_storage.Reference storageReference = firebase_storage
-        .FirebaseStorage.instance
-        .ref()
-        .child('Products/${basename(uplaodfinalImage.path)}');
+    // firebase_storage.Reference storageReference = firebase_storage
+    //     .FirebaseStorage.instance
+    //     .ref()
+    //     .child('Products/${basename(uplaodfinalImage.path)}');
 
-    firebase_storage.UploadTask uploadTask =
-        storageReference.putFile(uplaodfinalImage);
-    await uploadTask;
-    Fluttertoast.showToast(
-        msg: "File Uploaded", fontSize: 10, backgroundColor: Colors.black);
-    storageReference.getDownloadURL().then((fileURL) {
-      print(fileURL);
-      // setState(() {
-      //   _uploadedFileURL = fileURL;
-      // });
-    });
-    setState(() {
-      uploadedFile = uplaodfinalImage;
-    });
-    Navigator.of(context).pop();
+    // firebase_storage.UploadTask uploadTask =
+    //     storageReference.putFile(uplaodfinalImage);
+    // await uploadTask;
+    // Fluttertoast.showToast(
+    //     msg: "File Uploaded", fontSize: 10, backgroundColor: Colors.black);
+    // storageReference.getDownloadURL().then((fileURL) {
+    //   print(fileURL);
+    //   // setState(() {
+    //   //   _uploadedFileURL = fileURL;
+    //   // });
+    // });
+    // setState(() {
+    //   uploadedFile = uplaodfinalImage;
+    // });
+    // Navigator.of(context).pop();
   }
 }

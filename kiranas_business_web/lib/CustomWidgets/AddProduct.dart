@@ -16,7 +16,6 @@ import 'package:kiranas_business_web/StateManager/ProductListState.dart';
 import 'package:path/path.dart' as path;
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 Future<dynamic> productCategoryList;
 File uploadedFile;

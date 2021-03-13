@@ -1,6 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,14 +11,15 @@ import 'package:kiranas_business_web/Controllers/ProductController.dart';
 import 'package:kiranas_business_web/Podo/Product.dart';
 import 'package:kiranas_business_web/Screens/Home.dart';
 import 'package:kiranas_business_web/Screens/ImageProcessing.dart';
-import 'package:kiranas_business_web/Screens/ProductDetails.dart';
+import 'package:kiranas_business_web/StateManager/HomeDynamicPage.dart';
 import 'package:kiranas_business_web/StateManager/ProductListState.dart';
-import 'package:path/path.dart' as path;
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 
 Future<dynamic> productCategoryList;
-File uploadedFile;
+html.File uploadedFile;
 String imageURLToUpload;
 
 class AddProduct extends StatefulWidget {
@@ -34,11 +35,10 @@ class _AddProductState extends State<AddProduct> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<String> categoryList = new List<String>();
-  ProgressDialog progressDialog;
+  ProgressDialog progressDialogAddProduct;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     categoryList = [
       "Rice",
@@ -151,7 +151,7 @@ class _AddProductState extends State<AddProduct> {
               ? widget.prouctDetail.productData.productImageName
               : uploadedFile == null
                   ? null
-                  : path.basename(uploadedFile.path)
+                  : uploadedFile.name
 
           //  uploadedFile == null ? null : path.basename(uploadedFile.path)
         },
@@ -274,6 +274,11 @@ class _AddProductState extends State<AddProduct> {
                     SlideRightRoute(
                         widget: ImageProcessing(
                           uploadedFilePreview: uploadedFile ?? null,
+                          capturedImageFile: (s) {
+                            setState(() {
+                              uploadedFile = s;
+                            });
+                          },
                         ),
                         slideAction: "horizontal"));
               }
@@ -336,9 +341,9 @@ class _AddProductState extends State<AddProduct> {
 
   @override
   Widget build(BuildContext context) {
-    progressDialog = new ProgressDialog(context,
+    progressDialogAddProduct = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
-    progressDialog.style(
+    progressDialogAddProduct.style(
         message: "It's almost done !",
         progressWidget: CircularProgressIndicator(),
         progressWidgetAlignment: Alignment.centerRight,
@@ -622,17 +627,19 @@ class _AddProductState extends State<AddProduct> {
       currentFocus.unfocus();
     }
     if (_formKey.currentState.validate() && _formKey1.currentState.validate()) {
-      progressDialog.show().then((isShown) async {
+      progressDialogAddProduct.show().then((isShown) async {
         if (isShown) {
           _formKey.currentState.save();
           _formKey1.currentState.save();
 
           if (uploadedFile != null) {
-            // addProductImage();
+            addProductImage();
           } else {
+            progressDialogAddProduct.hide();
             Fluttertoast.showToast(
                 msg: " Please select an image first!",
                 fontSize: 13,
+                timeInSecForIosWeb: 3,
                 gravity: ToastGravity.CENTER,
                 backgroundColor: Colors.black);
           }
@@ -705,95 +712,96 @@ class _AddProductState extends State<AddProduct> {
 //     }
 //   }
 
-  // addProductImage() async {
-  //   StorageReference storageReference = FirebaseStorage.instance
-  //       .ref()
-  //       .child('Products/${path.basename(uploadedFile.path)}');
-  //   StorageUploadTask uploadTask = storageReference.putFile(uploadedFile);
-  //   await uploadTask.onComplete;
+  addProductImage() async {
+    String name = uploadedFile.name.toString();
+    firebase_storage.Reference storageReference =
+        firebase_storage.FirebaseStorage.instance.ref().child('Products/$name');
 
-  //   storageReference.getDownloadURL().then((fileURL) {
-  //     print(fileURL);
-  //     if (widget.isUpdateProduct) {
-  //       updateProduct(fileURL, path.basename(uploadedFile.path));
-  //     } else {
-  //       createProduct(fileURL, path.basename(uploadedFile.path));
-  //     }
-  //   }).catchError((err) {
-  //     progressDialog.hide();
-  //     scaffoldKey.currentState.showSnackBar(SnackBar(
-  //       content: Text(
-  //         "problem adding image!",
-  //         textAlign: TextAlign.center,
-  //       ),
-  //       duration: Duration(seconds: 5),
-  //     ));
-  //   });
-  // }
-
-  updateProduct(String fileURL, String imageName) {
-    ProductController()
-        .updateProduct(
-            productBrandController.text,
-            _selectedCategoryType == ""
-                ? widget.prouctDetail.productData.productCategory
-                : _selectedCategoryType,
-            productCpController.text,
-            productDescriptionController.text,
-            productMrpController.text,
-            productNameController.text,
-            int.parse(productOffPercentageController.text),
-            productQtyController.text,
-            productUnitController.text,
-            productNetWeightController.text,
-            fileURL,
-            widget.prouctDetail.productData.productID,
-            imageName)
-        .then((isProductUpdated) async {
-      if (isProductUpdated == "true") {
-        dynamic productList =
-            await ProductController().getProductList().catchError((error) {
-          progressDialog.hide();
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(
-              "Something went wrong",
-              textAlign: TextAlign.center,
-            ),
-            duration: Duration(seconds: 5),
-          ));
-        });
-
-        productDetails = ProductController()
-            .getProductByID(widget.prouctDetail.productData.productID);
-        productDetails.then((value) {
-          var productState =
-              Provider.of<ProductListState>(context, listen: false);
-          productState.setProductState(value);
-
-          var productListState =
-              Provider.of<ProductListState>(context, listen: false);
-          productListState.setProductListState(productList);
-
-          setState(() {
-            uploadedFile = null;
-          });
-
-          Navigator.of(context).pop();
-
-          progressDialog.hide();
-        }).catchError((err) {
-          progressDialog.hide();
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(
-              "something went wrong!",
-              textAlign: TextAlign.center,
-            ),
-            duration: Duration(seconds: 5),
-          ));
-        });
+    firebase_storage.UploadTask uploadTask =
+        storageReference.putBlob(uploadedFile);
+    await uploadTask;
+    storageReference.getDownloadURL().then((fileURL) {
+      print(fileURL);
+      if (widget.isUpdateProduct) {
+        //updateProduct(fileURL, path.basename(uploadedFile.path));
+      } else {
+        createProduct(fileURL, name);
       }
+    }).catchError((err) {
+      progressDialogAddProduct.hide();
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text(
+          "problem adding image!",
+          textAlign: TextAlign.center,
+        ),
+        duration: Duration(seconds: 5),
+      ));
     });
   }
+
+  // updateProduct(String fileURL, String imageName) {
+  //   ProductController()
+  //       .updateProduct(
+  //           productBrandController.text,
+  //           _selectedCategoryType == ""
+  //               ? widget.prouctDetail.productData.productCategory
+  //               : _selectedCategoryType,
+  //           productCpController.text,
+  //           productDescriptionController.text,
+  //           productMrpController.text,
+  //           productNameController.text,
+  //           int.parse(productOffPercentageController.text),
+  //           productQtyController.text,
+  //           productUnitController.text,
+  //           productNetWeightController.text,
+  //           fileURL,
+  //           widget.prouctDetail.productData.productID,
+  //           imageName)
+  //       .then((isProductUpdated) async {
+  //     if (isProductUpdated == "true") {
+  //       dynamic productList =
+  //           await ProductController().getProductList().catchError((error) {
+  //         progressDialog.hide();
+  //         scaffoldKey.currentState.showSnackBar(SnackBar(
+  //           content: Text(
+  //             "Something went wrong",
+  //             textAlign: TextAlign.center,
+  //           ),
+  //           duration: Duration(seconds: 5),
+  //         ));
+  //       });
+
+  //       productDetails = ProductController()
+  //           .getProductByID(widget.prouctDetail.productData.productID);
+  //       productDetails.then((value) {
+  //         var productState =
+  //             Provider.of<ProductListState>(context, listen: false);
+  //         productState.setProductState(value);
+
+  //         var productListState =
+  //             Provider.of<ProductListState>(context, listen: false);
+  //         productListState.setProductListState(productList);
+
+  //         setState(() {
+  //           uploadedFile = null;
+  //         });
+
+  //         Navigator.of(context).pop();
+
+  //         progressDialog.hide();
+  //       }).catchError((err) {
+  //         progressDialog.hide();
+  //         scaffoldKey.currentState.showSnackBar(SnackBar(
+  //           content: Text(
+  //             "something went wrong!",
+  //             textAlign: TextAlign.center,
+  //           ),
+  //           duration: Duration(seconds: 5),
+  //         ));
+  //       });
+  //     }
+  //   });
+  // }
 
   createProduct(String fileURL, String imageName) {
     ProductController()
@@ -822,11 +830,21 @@ class _AddProductState extends State<AddProduct> {
             uploadedFile = null;
           });
 
-          Navigator.of(context).pop();
+          var homeDYnamicPageState =
+              Provider.of<HomeDynamicPageState>(context, listen: false);
 
-          progressDialog.hide();
+          homeDYnamicPageState.setActiveHomePage("home");
+          print('doneeeeeeeeeeeeeeeee');
+          progressDialogAddProduct.hide().then((value) {
+            Fluttertoast.showToast(
+                gravity: ToastGravity.CENTER,
+                msg: "Product Created!",
+                timeInSecForIosWeb: 3,
+                fontSize: 10,
+                backgroundColor: Colors.black);
+          });
         }).catchError((err) {
-          progressDialog.hide();
+          progressDialogAddProduct.hide();
           scaffoldKey.currentState.showSnackBar(SnackBar(
             content: Text(
               "Something went wrong!",

@@ -1,74 +1,62 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:kiranas_business_web/CommonScreens/AppBarCommon.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker_web/image_picker_web.dart';
+import 'package:kiranas_business_web/CommonScreens/SlideRightRoute.dart';
 import 'package:kiranas_business_web/CustomWidgets/AddProduct.dart';
-import 'package:flutter_web_image_picker/flutter_web_image_picker.dart';
+import 'package:kiranas_business_web/CustomWidgets/CropImage.dart';
 
-import 'package:path/path.dart' as path;
-import 'package:path/path.dart';
+import 'dart:html' as html;
 
-typedef capturedImageFile = String Function(String);
+import 'package:mime_type/mime_type.dart';
+import 'package:path/path.dart' as Path;
+import 'dart:ui' as ui;
 
 class ImageProcessing extends StatefulWidget {
-  final File uploadedFilePreview;
-  ImageProcessing({this.uploadedFilePreview});
+  final html.File uploadedFilePreview;
+  final void Function(html.File) capturedImageFile;
+  ImageProcessing({this.uploadedFilePreview, this.capturedImageFile});
   @override
   _ImageProcessingState createState() => _ImageProcessingState();
 }
 
 class _ImageProcessingState extends State<ImageProcessing> {
-  Image image;
-  File uplaodfinalImage;
-  String showImageFile = "";
+  html.File _cloudFile;
+
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  /// Cropper plugin
-  // Future<void> _cropImage() async {
+  /// Select an image via gallery
+  Future<void> _pickImage(BuildContext context) async {
+    final mediaData = await ImagePickerWeb.getImage(outputType: ImageType.file);
 
-  //   setState(() {
-  //     _imageFile = cropped.path ?? _imageFile;
-  //   });
-  // }
+    if (true) {
+      setState(() {
+        _cloudFile = mediaData;
+      });
 
-  /// Select an image via gallery or camera
-  Future<void> _pickImage(ImageSource source,
-      {BuildContext context, capturedImageFile}) async {
-    final ImagePicker picker = ImagePicker();
-    final selected = await picker.getImage(source: source);
-
-    File cropped = await ImageCropper.cropImage(
-        sourcePath: selected.path,
-        aspectRatioPresets: const [CropAspectRatioPreset.square],
-        compressQuality: 100,
-        maxHeight: 300,
-        maxWidth: 500,
-        // ratioX: 1.0,
-        // ratioY: 1.0,
-        // maxWidth: 512,
-        // maxHeight: 512,
-        cropStyle: CropStyle.circle,
-        compressFormat: ImageCompressFormat.jpg,
-        androidUiSettings: AndroidUiSettings(
-            toolbarColor: Colors.black,
-            toolbarWidgetColor: Colors.white,
-            toolbarTitle: 'CROP IMAGE'));
-
-    //  cropped != null ? capturedImageFile(cropped.path) : capturedImageFile("");
-    capturedImageFile(cropped.path);
-    setState(() {
-      uplaodfinalImage = cropped;
-    });
+      // Navigator.push(
+      //     context,
+      //     SlideRightRoute(
+      //         widget: CropImage(
+      //           selectedImage: _imageWidget,
+      //           capturedImageFile: (s) {
+      //             setState(() {
+      //               finaImage = s;
+      //             });
+      //             return null;
+      //           },
+      //         ),
+      //         slideAction: "horizontal"));
+    } //
   }
 
   /// Remove image
   void _clear() {
     setState(() {
-      showImageFile = "";
-      image = null;
+      _cloudFile = null;
     });
   }
 
@@ -92,116 +80,136 @@ class _ImageProcessingState extends State<ImageProcessing> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.photo_camera),
-              onPressed: () {
-                _pickImage(
-                  ImageSource.camera,
-                  context: context,
-                  capturedImageFile: (s) {
-                    setState(() {
-                      showImageFile = s;
-                    });
-                  },
-                );
-              },
-            ),
-            IconButton(
                 icon: Icon(Icons.photo_library),
                 onPressed: () async {
-                  final _image = await FlutterWebImagePicker.getImage;
-                  setState(() {
-                    image = _image;
-                  });
-                }
-
-                // _pickImage(
-                //   ImageSource.gallery,
-                //   context: context,
-                //   capturedImageFile: (s) {
-                //     setState(() {
-                //       showImageFile = s;
-                //     });
-                //   },
-                // ),
-                ),
+                  _pickImage(context);
+                }),
           ],
         ),
       ),
 
       // Preview the image and crop it
-      body: ListView(
-        children: <Widget>[
-          if (showImageFile.isNotEmpty ||
-              showImageFile != "" ||
-              image != null) ...[
-            Container(
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10), child: image
-                  // Image.asset(
-                  //   "$showImageFile",
-                  //   // height: _width * 0.34,
-                  //   // width: _width,
-                  //   alignment: Alignment.center,
-                  //   // fit: BoxFit.fitWidth,
-                  // )
-                  ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                FlatButton(
-                  child: Icon(Icons.refresh),
-                  onPressed: _clear,
-                ),
-                FlatButton(
-                    child: Icon(Icons.check),
-                    onPressed: () {
-                      uploadFile(context);
-                    }),
-              ],
-            ),
+      body: Center(
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            if (_cloudFile != null) ...[
+              // Center(
+              //   child: Container(
+              //     child: ClipRRect(
+              //       borderRadius: BorderRadius.circular(10),
+              //       child: _imageWidget,
 
-            // Uploader(file: _imageFile)
-          ] else ...[
-            Container(
-              child: ClipRRect(
+              //       // Image.asset(
+              //       //   "$showImageFile",
+              //       //   // height: _width * 0.34,
+              //       //   // width: _width,
+              //       //   alignment: Alignment.center,
+              //       //   // fit: BoxFit.fitWidth,
+              //       // )
+              //     ),
+              //   ),
+              // ),
+              Center(
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Icon(
-                    Icons.image,
+                  child: Container(
                     color: Colors.grey[300],
-                    size: 300,
-                  )),
-            ),
-            Text(
-              "Plese Select/ capture image.",
-              textAlign: TextAlign.center,
-            )
-          ]
-        ],
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(
+                        _cloudFile.name +
+                            "\n" +
+                            (((_cloudFile.size / 1024).ceil()) > 1023
+                                ? (_cloudFile.size / (1024 * 1024))
+                                        .ceil()
+                                        .toString() +
+                                    "MB"
+                                : (_cloudFile.size / 1024).ceil().toString() +
+                                    "KB"),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 30,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      FlatButton(
+                        splashColor: Colors.grey,
+                        textColor: Colors.white,
+                        color: Colors.pink[900],
+                        child: Text("RESET"),
+                        onPressed: _clear,
+                      ),
+                      FlatButton(
+                          splashColor: Colors.grey,
+                          color: Colors.pink[900],
+                          textColor: Colors.white,
+                          child: Text("UPLOAD"),
+                          onPressed: () async {
+                            // var byteData = await _imageWidget.toByteData(
+                            //     format: ui.ImageByteFormat.rawRgba);
+                            // var buffer = byteData.buffer.asUint8List();
+                            // String mimeType =
+                            //     mime(Path.basename(mediaData.fileName));
+                            // print(mimeType);
+                            // html.File dd = new html.File(
+                            //     buffer, mediaData.fileName, {'type': mimeType});
+                            uploadFile(context, _cloudFile);
+                          }),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Uploader(file: _imageFile)
+            ] else ...[
+              Container(
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Icon(
+                      Icons.image,
+                      color: Colors.grey[300],
+                      size: 300,
+                    )),
+              ),
+              Text(
+                "Plese select image",
+                textAlign: TextAlign.center,
+              )
+            ]
+          ],
+        ),
       ),
     );
   }
 
-  Future uploadFile(BuildContext context) async {
-    // firebase_storage.Reference storageReference = firebase_storage
-    //     .FirebaseStorage.instance
-    //     .ref()
-    //     .child('Products/${basename(uplaodfinalImage.path)}');
+  Future uploadFile(BuildContext context, html.File img) async {
+    // String name = img.name.toString();
+    // firebase_storage.Reference storageReference =
+    //     firebase_storage.FirebaseStorage.instance.ref().child('Products/$name');
 
-    // firebase_storage.UploadTask uploadTask =
-    //     storageReference.putFile(uplaodfinalImage);
+    // firebase_storage.UploadTask uploadTask = storageReference.putBlob(img);
     // await uploadTask;
     // Fluttertoast.showToast(
-    //     msg: "File Uploaded", fontSize: 10, backgroundColor: Colors.black);
+    //     gravity: ToastGravity.CENTER,
+    //     msg: "File Uploaded",
+    //     fontSize: 10,
+    //     backgroundColor: Colors.black);
     // storageReference.getDownloadURL().then((fileURL) {
     //   print(fileURL);
-    //   // setState(() {
-    //   //   _uploadedFileURL = fileURL;
-    //   // });
     // });
-    // setState(() {
-    //   uploadedFile = uplaodfinalImage;
-    // });
-    // Navigator.of(context).pop();
+
+    widget.capturedImageFile(img);
+
+    Navigator.of(context).pop();
   }
 }

@@ -11,6 +11,7 @@ import 'package:kiranas_business_web/Controllers/ProductController.dart';
 import 'package:kiranas_business_web/Podo/Product.dart';
 import 'package:kiranas_business_web/Screens/Home.dart';
 import 'package:kiranas_business_web/Screens/ImageProcessing.dart';
+import 'package:kiranas_business_web/Screens/ProductDetails.dart';
 import 'package:kiranas_business_web/StateManager/HomeDynamicPage.dart';
 import 'package:kiranas_business_web/StateManager/ProductListState.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -147,7 +148,7 @@ class _AddProductState extends State<AddProduct> {
             labelText: "Product Image",
           ),
           "keyboardType": TextInputType.multiline,
-          "initialvalue": widget.isUpdateProduct
+          "initialvalue": widget.isUpdateProduct && uploadedFile == null
               ? widget.prouctDetail.productData.productImageName
               : uploadedFile == null
                   ? null
@@ -413,10 +414,9 @@ class _AddProductState extends State<AddProduct> {
                 ),
                 splashColor: Colors.white,
                 onPressed: () {
-                  // widget.isUpdateProduct
-                  //     ?
-                  //validateUpdateProduct()
-                  validateCreateProduct();
+                  widget.isUpdateProduct
+                      ? validateUpdateProduct()
+                      : validateCreateProduct();
                 },
                 color: Colors.pink[900],
                 child: widget.isUpdateProduct
@@ -660,57 +660,56 @@ class _AddProductState extends State<AddProduct> {
     }
   }
 
-//   void validateUpdateProduct() {
-//     FocusScopeNode currentFocus = FocusScope.of(context);
+  void validateUpdateProduct() {
+    FocusScopeNode currentFocus = FocusScope.of(context);
 
-//     if (!currentFocus.hasPrimaryFocus) {
-//       currentFocus.unfocus();
-//     }
-//     if (_formKey.currentState.validate() && _formKey1.currentState.validate()) {
-//       progressDialog.show().then((isShown) async {
-//         if (isShown) {
-//           _formKey.currentState.save();
-//           _formKey1.currentState.save();
+    if (!currentFocus.hasPrimaryFocus) {
+      currentFocus.unfocus();
+    }
+    if (_formKey.currentState.validate() && _formKey1.currentState.validate()) {
+      progressDialogAddProduct.show().then((isShown) async {
+        if (isShown) {
+          _formKey.currentState.save();
+          _formKey1.currentState.save();
 
-//           if (uploadedFile != null) {
-//             StorageReference storageReferenceDelete = FirebaseStorage.instance
-//                 .ref()
-//                 .child(
-//                     'Products/${widget.prouctDetail.productData.productImageName}');
+          if (uploadedFile != null) {
+            firebase_storage.Reference storageReferenceDelete =
+                firebase_storage.FirebaseStorage.instance.ref().child(
+                    'Products/${widget.prouctDetail.productData.productImageName}');
 
-//             storageReferenceDelete.delete().then((_) {
-//               print("file Deleted");
-//               addProductImage();
-//             }).catchError((err) {
-//               progressDialog.hide();
-//               scaffoldKey.currentState.showSnackBar(SnackBar(
-//                 content: Text(
-//                   "something went wrong!",
-//                   textAlign: TextAlign.center,
-//                 ),
-//                 duration: Duration(seconds: 5),
-//               ));
-//             });
-//           } else {
-//             updateProduct(widget.prouctDetail.productData.productUrl,
-//                 widget.prouctDetail.productData.productImageName);
-//           }
-//         }
-//       });
-// //    If all data are correct then save data to out variables
+            storageReferenceDelete.delete().then((_) {
+              print("file Deleted");
+              addProductImage();
+            }).catchError((err) {
+              progressDialogAddProduct.hide();
+              scaffoldKey.currentState.showSnackBar(SnackBar(
+                content: Text(
+                  "something went wrong!",
+                  textAlign: TextAlign.center,
+                ),
+                duration: Duration(seconds: 5),
+              ));
+            });
+          } else {
+            updateProduct(widget.prouctDetail.productData.productUrl,
+                widget.prouctDetail.productData.productImageName);
+          }
+        }
+      });
+//    If all data are correct then save data to out variables
 
-//     } else {
-// //    If all data are not valid then start auto validation.
+    } else {
+//    If all data are not valid then start auto validation.
 
-//       validateAll(1, "inventoryDetailStepState", _autoValidate, _formKey);
-//       validateAll(2, "priceStepState", _autoValidate1, _formKey1);
+      validateAll(1, "inventoryDetailStepState", _autoValidate, _formKey);
+      validateAll(2, "priceStepState", _autoValidate1, _formKey1);
 
-//       scaffoldKey.currentState.showSnackBar(SnackBar(
-//         content: Text("Please, fill all fields displayed in RED!!!!"),
-//         duration: Duration(seconds: 3),
-//       ));
-//     }
-//   }
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text("Please, fill all fields displayed in RED!!!!"),
+        duration: Duration(seconds: 3),
+      ));
+    }
+  }
 
   addProductImage() async {
     String name = uploadedFile.name.toString();
@@ -723,7 +722,7 @@ class _AddProductState extends State<AddProduct> {
     storageReference.getDownloadURL().then((fileURL) {
       print(fileURL);
       if (widget.isUpdateProduct) {
-        //updateProduct(fileURL, path.basename(uploadedFile.path));
+        updateProduct(fileURL, name);
       } else {
         createProduct(fileURL, name);
       }
@@ -739,69 +738,75 @@ class _AddProductState extends State<AddProduct> {
     });
   }
 
-  // updateProduct(String fileURL, String imageName) {
-  //   ProductController()
-  //       .updateProduct(
-  //           productBrandController.text,
-  //           _selectedCategoryType == ""
-  //               ? widget.prouctDetail.productData.productCategory
-  //               : _selectedCategoryType,
-  //           productCpController.text,
-  //           productDescriptionController.text,
-  //           productMrpController.text,
-  //           productNameController.text,
-  //           int.parse(productOffPercentageController.text),
-  //           productQtyController.text,
-  //           productUnitController.text,
-  //           productNetWeightController.text,
-  //           fileURL,
-  //           widget.prouctDetail.productData.productID,
-  //           imageName)
-  //       .then((isProductUpdated) async {
-  //     if (isProductUpdated == "true") {
-  //       dynamic productList =
-  //           await ProductController().getProductList().catchError((error) {
-  //         progressDialog.hide();
-  //         scaffoldKey.currentState.showSnackBar(SnackBar(
-  //           content: Text(
-  //             "Something went wrong",
-  //             textAlign: TextAlign.center,
-  //           ),
-  //           duration: Duration(seconds: 5),
-  //         ));
-  //       });
+  updateProduct(String fileURL, String imageName) {
+    ProductController()
+        .updateProduct(
+            productBrandController.text,
+            _selectedCategoryType == ""
+                ? widget.prouctDetail.productData.productCategory
+                : _selectedCategoryType,
+            productCpController.text,
+            productDescriptionController.text,
+            productMrpController.text,
+            productNameController.text,
+            int.parse(productOffPercentageController.text),
+            productQtyController.text,
+            productUnitController.text,
+            productNetWeightController.text,
+            fileURL,
+            widget.prouctDetail.productData.productID,
+            imageName)
+        .then((isProductUpdated) async {
+      if (isProductUpdated == "true") {
+        dynamic productList =
+            await ProductController().getProductList().catchError((error) {
+          progressDialogAddProduct.hide();
+          scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text(
+              "Something went wrong",
+              textAlign: TextAlign.center,
+            ),
+            duration: Duration(seconds: 5),
+          ));
+        });
 
-  //       productDetails = ProductController()
-  //           .getProductByID(widget.prouctDetail.productData.productID);
-  //       productDetails.then((value) {
-  //         var productState =
-  //             Provider.of<ProductListState>(context, listen: false);
-  //         productState.setProductState(value);
+        productDetails = ProductController()
+            .getProductByID(widget.prouctDetail.productData.productID);
+        productDetails.then((value) {
+          var productState =
+              Provider.of<ProductListState>(context, listen: false);
+          productState.setProductState(value);
 
-  //         var productListState =
-  //             Provider.of<ProductListState>(context, listen: false);
-  //         productListState.setProductListState(productList);
+          var productListState =
+              Provider.of<ProductListState>(context, listen: false);
+          productListState.setProductListState(productList);
 
-  //         setState(() {
-  //           uploadedFile = null;
-  //         });
+          setState(() {
+            uploadedFile = null;
+          });
 
-  //         Navigator.of(context).pop();
-
-  //         progressDialog.hide();
-  //       }).catchError((err) {
-  //         progressDialog.hide();
-  //         scaffoldKey.currentState.showSnackBar(SnackBar(
-  //           content: Text(
-  //             "something went wrong!",
-  //             textAlign: TextAlign.center,
-  //           ),
-  //           duration: Duration(seconds: 5),
-  //         ));
-  //       });
-  //     }
-  //   });
-  // }
+          progressDialogAddProduct.hide().then((value) {
+            Fluttertoast.showToast(
+                gravity: ToastGravity.CENTER,
+                msg: "Product Updated!",
+                timeInSecForIosWeb: 3,
+                fontSize: 10,
+                backgroundColor: Colors.black);
+          });
+          Navigator.of(context).pop();
+        }).catchError((err) {
+          progressDialogAddProduct.hide();
+          scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text(
+              "something went wrong!",
+              textAlign: TextAlign.center,
+            ),
+            duration: Duration(seconds: 5),
+          ));
+        });
+      }
+    });
+  }
 
   createProduct(String fileURL, String imageName) {
     ProductController()
@@ -830,11 +835,15 @@ class _AddProductState extends State<AddProduct> {
             uploadedFile = null;
           });
 
-          var homeDYnamicPageState =
-              Provider.of<HomeDynamicPageState>(context, listen: false);
+          if (MediaQuery.of(context).size.width > 800.0) {
+            var homeDYnamicPageState =
+                Provider.of<HomeDynamicPageState>(context, listen: false);
 
-          homeDYnamicPageState.setActiveHomePage("home");
-          print('doneeeeeeeeeeeeeeeee');
+            homeDYnamicPageState.setActiveHomePage("home");
+          } else {
+            Navigator.of(context).pop();
+          }
+
           progressDialogAddProduct.hide().then((value) {
             Fluttertoast.showToast(
                 gravity: ToastGravity.CENTER,

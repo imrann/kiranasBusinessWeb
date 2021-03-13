@@ -185,15 +185,6 @@ class DrawerTiles extends StatelessWidget {
                     prouctDetail: null,
                   ));
             }
-
-            // Navigator.push(
-            //     context,
-            //     SlideRightRoute(
-            //         widget: AddProduct(
-            //           isUpdateProduct: false,
-            //           prouctDetail: null,
-            //         ),
-            //         slideAction: "vertical"));
           }
         });
   }

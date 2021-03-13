@@ -182,9 +182,15 @@ class _HomeState extends State<Home> {
                                       initialTabIndex: "0",
                                     );
                                   } else if (data.getActiveHomePage() ==
-                                      "addProduct") {
+                                      "addProduct") { 
                                     return AddProduct(
                                       isUpdateProduct: false,
+                                      prouctDetail: null,
+                                    );
+                                  } else if (data.getActiveHomePage() ==
+                                      "updateProduct") { 
+                                    return AddProduct(
+                                      isUpdateProduct: true,
                                       prouctDetail: null,
                                     );
                                   } else if (data.getActiveHomePage() ==

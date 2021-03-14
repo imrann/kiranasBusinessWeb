@@ -318,7 +318,7 @@ class _DrawerNavState extends State<DrawerNav> {
                 child:
                     Consumer<OrdersListState>(builder: (context, data, child) {
                   return Text(
-                    data.getOrdersListState().length.toString(),
+                    data.getTotalOrdersLength().toString(),
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 10,

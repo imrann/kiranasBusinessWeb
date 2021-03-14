@@ -23,6 +23,10 @@ final DateFormat formatForEstTime = new DateFormat("dd-MM-yyyy");
 Future<dynamic> openOrdersList;
 
 class OpenOrders extends StatefulWidget {
+  final TabController tabController;
+
+  OpenOrders({this.tabController});
+
   @override
   _OpenOrdersState createState() => _OpenOrdersState();
 }
@@ -37,7 +41,6 @@ class _OpenOrdersState extends State<OpenOrders> {
 
   setIsMoreOrdersAvailable() {
     isMoreOrdersAvailable = true;
-    print("Called BACK");
   }
 
   String estSeletedDate;
@@ -751,8 +754,17 @@ class _OpenOrdersState extends State<OpenOrders> {
                   Provider.of<OrdersListState>(context, listen: false);
               ordersListState.setOrdersListState(value);
               progressDialog.hide().then((isHidden) {
-                if (orderListState.orderData.oTrackingStatus == "Placed") {
-                  Navigator.of(context).pop();
+                if (item['buttonLabel'] == "CANCEL ORDER") {
+                  widget.tabController
+                      .animateTo(widget.tabController.index += 2);
+                } else if (item['buttonLabel'] == "ORDER DELIVERED") {
+                  print(widget.tabController.index);
+
+                  widget.tabController
+                      .animateTo(widget.tabController.index += 1);
+                } else if (item['buttonLabel'] == "ACCEPT ORDER") {
+                  print(widget.tabController.index);
+                  Navigator.of(context).pop(true);
                 }
 
                 Fluttertoast.showToast(

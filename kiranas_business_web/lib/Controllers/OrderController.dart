@@ -26,6 +26,12 @@ class OrderController {
     return ordersList;
   }
 
+  Future<dynamic> getTotalOrdersByType(String type) async {
+    var ordersLength = await OrderService().getTotalOrdersByType(type);
+
+    return ordersLength;
+  }
+
   Future<dynamic> getPaginatedOrdersOnlyByType(
       String type, String lastOrderID, num lastOUpdateDate) async {
     var ordersList = await OrderService()

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:kiranas_business_web/CommonScreens/ErrorPage.dart';
 import 'package:kiranas_business_web/CommonScreens/FancyLoader.dart';
+import 'package:kiranas_business_web/Controllers/OrderController.dart';
 import 'package:kiranas_business_web/Controllers/ProductController.dart';
 import 'package:kiranas_business_web/CustomWidgets/AddProduct.dart';
 import 'package:kiranas_business_web/Podo/Product.dart';
@@ -22,6 +23,7 @@ import 'package:transparent_image/transparent_image.dart';
 import 'DrawerNav.dart';
 
 Future<dynamic> productList;
+Future<dynamic> totalOrdersLength;
 Future<String> image;
 
 class Home extends StatefulWidget {
@@ -46,14 +48,7 @@ class _HomeState extends State<Home> {
   @override
   initState() {
     super.initState();
-
-    // final ref =
-    //     FirebaseStorage.instance.ref().child('image_cropper_1612637899989');
-    // image = ref.getDownloadURL();
-    // image.then((imaged) {
-    //   print("asasasasasasasssss:  " + imaged.toString());
-    // });
-
+    getOpenOrdersChunk();
     productList = ProductController().getProductList();
     productList.then((value) async {
       var productState = Provider.of<ProductListState>(context, listen: false);
@@ -67,6 +62,17 @@ class _HomeState extends State<Home> {
         ),
         duration: Duration(seconds: 5),
       ));
+    });
+  }
+
+  getOpenOrdersChunk() {
+    totalOrdersLength = OrderController().getTotalOrdersByType("Open");
+
+    totalOrdersLength.then((openOrderslength) {
+      var ordersListState =
+          Provider.of<OrdersListState>(context, listen: false);
+      ordersListState.setTotalOrdersLength(openOrderslength);
+       
     });
   }
 
@@ -182,13 +188,13 @@ class _HomeState extends State<Home> {
                                       initialTabIndex: "0",
                                     );
                                   } else if (data.getActiveHomePage() ==
-                                      "addProduct") { 
+                                      "addProduct") {
                                     return AddProduct(
                                       isUpdateProduct: false,
                                       prouctDetail: null,
                                     );
                                   } else if (data.getActiveHomePage() ==
-                                      "updateProduct") { 
+                                      "updateProduct") {
                                     return AddProduct(
                                       isUpdateProduct: true,
                                       prouctDetail: null,
@@ -598,7 +604,7 @@ class _HomeState extends State<Home> {
                     child: Consumer<OrdersListState>(
                         builder: (context, data, child) {
                       return Text(
-                        data.getOrdersListState().length.toString(),
+                        data.getTotalOrdersLength().toString(),
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 10,

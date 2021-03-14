@@ -3,6 +3,16 @@ import 'package:kiranas_business_web/Podo/Orders.dart';
 import 'package:kiranas_business_web/Podo/OrdersData.dart';
 
 class OrdersListState extends ChangeNotifier {
+  int totalOrdersLength = 0;
+
+  int getTotalOrdersLength() => totalOrdersLength;
+
+  setTotalOrdersLength(int totalOrdersLength) {
+    this.totalOrdersLength = totalOrdersLength;
+    notifyListeners();
+  }
+
+  //////////////////////////////////////////////////////////////
   List<OrdersData> ordersListState = [];
 
   List<OrdersData> getOrdersListState() => ordersListState;

@@ -63,6 +63,16 @@ class _OpenOrdersState extends State<OpenOrders> {
     });
   }
 
+  Future<bool> getTotalOpenOrders() async {
+    dynamic totalOrdersLength;
+
+    totalOrdersLength = await OrderController().getTotalOrdersByType("Open");
+
+    var ordersListState = Provider.of<OrdersListState>(context, listen: false);
+    ordersListState.setTotalOrdersLength(totalOrdersLength);
+    return true;
+  }
+
   getPaginatedOrdersOnlyByType() {
     if (isMoreOrdersAvailable && isGetMoreOrders) {
       setState(() {
@@ -753,13 +763,14 @@ class _OpenOrdersState extends State<OpenOrders> {
               var ordersListState =
                   Provider.of<OrdersListState>(context, listen: false);
               ordersListState.setOrdersListState(value);
-              progressDialog.hide().then((isHidden) {
+              progressDialog.hide().then((isHidden) async {
                 if (item['buttonLabel'] == "CANCEL ORDER") {
+                  await getTotalOpenOrders();
                   widget.tabController
                       .animateTo(widget.tabController.index += 2);
                 } else if (item['buttonLabel'] == "ORDER DELIVERED") {
                   print(widget.tabController.index);
-
+                  await getTotalOpenOrders();
                   widget.tabController
                       .animateTo(widget.tabController.index += 1);
                 } else if (item['buttonLabel'] == "ACCEPT ORDER") {

@@ -72,7 +72,6 @@ class _HomeState extends State<Home> {
       var ordersListState =
           Provider.of<OrdersListState>(context, listen: false);
       ordersListState.setTotalOrdersLength(openOrderslength);
-       
     });
   }
 
@@ -542,9 +541,16 @@ class _HomeState extends State<Home> {
 
   Future<void> refreshPage() async {
     productList = ProductController().getProductList();
-    return productList.then((value) {
+
+    return productList.then((value) async {
       var productState = Provider.of<ProductListState>(context, listen: false);
       productState.setProductListState(value);
+      dynamic openOrderslength =
+          await OrderController().getTotalOrdersByType("Open");
+
+      var ordersListState =
+          Provider.of<OrdersListState>(context, listen: false);
+      ordersListState.setTotalOrdersLength(openOrderslength);
     }).catchError((err) {
       progressDialog.hide();
       scaffoldKey.currentState.showSnackBar(SnackBar(

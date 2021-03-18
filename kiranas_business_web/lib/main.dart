@@ -111,7 +111,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           onGenerateRoute: RouterGenerator.generateRoute,
-          title: 'KiranasBusinessWeb',
+          title: 'BrandedBaniyaBusiness',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primarySwatch: colorCustom,

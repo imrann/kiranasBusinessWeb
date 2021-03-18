@@ -95,21 +95,21 @@ class _DrawerNavState extends State<DrawerNav> {
                                     color: Colors.pink[900],
                                   ),
                                 ),
-                                // Card(
-                                //   color: Colors.pink[900],
-                                //   child: Padding(
-                                //       padding: const EdgeInsets.all(4.0),
-                                //       child: Text(
-                                //         widget.userRole,
-                                //         textAlign: TextAlign.center,
-                                //         style: TextStyle(
-                                //           fontSize: 15.0,
-                                //           color: Colors.white,
-                                //         ),
-                                //       )),
-                                // ),
                               ],
                             ),
+                          ),
+                          Card(
+                            color: Colors.pink[900],
+                            child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Text(
+                                  "ADMIN",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 10.0,
+                                    color: Colors.white,
+                                  ),
+                                )),
                           ),
                         ],
                       ),

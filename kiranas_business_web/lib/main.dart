@@ -50,7 +50,7 @@ Future<void> main() async {
   });
 
   UserDetailsSP().getUserDetails().then((value) {
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 3), () {
       if (currentLoggedUser != null) {
         currentLoggedUser.getIdToken().then((token) {
           print(token.toString());

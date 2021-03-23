@@ -93,6 +93,7 @@ class _SplashState extends State<Splash> {
                           softWrap: true,
                           textAlign: TextAlign.center,
                           style: TextStyle(
+                              color: Colors.pink[900],
                               fontSize: ((MediaQuery.of(context).size.width >=
                                           450.0) &&
                                       (MediaQuery.of(context).size.width <=
@@ -116,38 +117,42 @@ class _SplashState extends State<Splash> {
                   ),
                 ],
               ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: <Widget>[getTagline("BUSINESS")],
+              // ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  AnimatedOpacity(
-                    duration: Duration(milliseconds: 700),
-                    opacity: _visible ? 1.0 : 0.0,
-                    child: Text(
-                      'BUSINESS',
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: ((MediaQuery.of(context).size.width >=
-                                      450.0) &&
-                                  (MediaQuery.of(context).size.width <= 800.0))
-                              ? 25
-                              : ((MediaQuery.of(context).size.width > 800.0) &&
-                                      (MediaQuery.of(context).size.width <=
-                                          1100.0))
-                                  ? 35
-                                  : (MediaQuery.of(context).size.width > 1100.0)
-                                      ? 45
-                                      : 15,
-                          wordSpacing: 1,
-                          fontStyle: FontStyle.italic),
-                    ),
-                  ),
-                ],
+                children: <Widget>[getTagline("Everything below MRP")],
               )
             ],
           ),
         ),
       ),
     ));
+  }
+
+  getTagline(String textToAnimate) {
+    return AnimatedOpacity(
+      duration: Duration(milliseconds: 700),
+      opacity: _visible ? 1.0 : 0.0,
+      child: Text(
+        textToAnimate,
+        maxLines: 2,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            fontSize: ((MediaQuery.of(context).size.width >= 450.0) &&
+                    (MediaQuery.of(context).size.width <= 800.0))
+                ? 25
+                : ((MediaQuery.of(context).size.width > 800.0) &&
+                        (MediaQuery.of(context).size.width <= 1100.0))
+                    ? 35
+                    : (MediaQuery.of(context).size.width > 1100.0)
+                        ? 45
+                        : 15,
+            wordSpacing: 1,
+            fontStyle: FontStyle.italic),
+      ),
+    );
   }
 }

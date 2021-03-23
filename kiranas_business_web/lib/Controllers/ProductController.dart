@@ -71,12 +71,14 @@ class ProductController {
       String productDescription,
       String productMrp,
       String productName,
-      int productOffPercentage,
+      String productOffPrice,
       String productQty,
       String productUnit,
       String productNetWeight,
       String productUrl,
       String imageName) async {
+    double productOffPercentage =
+        (double.parse(productOffPrice) / double.parse(productMrp)) * 100;
     var body = json.encode({
       "productBrand": productBrand,
       "productCategory": productCategory,
@@ -85,6 +87,7 @@ class ProductController {
       "productMrp": productMrp,
       "productName": productName.toUpperCase(),
       "productOffPercentage": productOffPercentage,
+      "productOffPrice": productOffPrice,
       "productQty": productQty,
       "productUnit": productUnit,
       "productNetWeight": productNetWeight,
@@ -107,13 +110,15 @@ class ProductController {
       String productDescription,
       String productMrp,
       String productName,
-      int productOffPercentage,
+      String productOffPrice,
       String productQty,
       String productUnit,
       String productNetWeight,
       String productUrl,
       String productID,
       String imageName) async {
+    double productOffPercentage =
+        (double.parse(productOffPrice) / double.parse(productMrp)) * 100;
     var updateBody = json.encode({
       "productBrand": productBrand,
       "productCategory": productCategory,
@@ -122,6 +127,7 @@ class ProductController {
       "productMrp": productMrp,
       "productName": productName.toUpperCase(),
       "productOffPercentage": productOffPercentage,
+      "productOffPrice": productOffPrice,
       "productQty": productQty,
       "productUnit": productUnit,
       "productNetWeight": productNetWeight,

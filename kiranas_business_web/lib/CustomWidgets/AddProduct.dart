@@ -79,8 +79,7 @@ class _AddProductState extends State<AddProduct> {
   TextEditingController productMrpController = TextEditingController();
   TextEditingController productQtyController = TextEditingController();
   TextEditingController productUnitController = TextEditingController();
-  TextEditingController productOffPercentageController =
-      TextEditingController();
+  TextEditingController productOffPriceController = TextEditingController();
 
   bool _autoValidate = false;
   bool _autoValidate1 = false;
@@ -100,7 +99,7 @@ class _AddProductState extends State<AddProduct> {
     productCpController.dispose();
     productMrpController.dispose();
     productQtyController.dispose();
-    productOffPercentageController.dispose();
+    productOffPriceController.dispose();
     super.dispose();
   }
 
@@ -187,7 +186,7 @@ class _AddProductState extends State<AddProduct> {
 
   List<Map<String, dynamic>> get productPriceDetailsMap => [
         {
-          "validator": validateEmpty,
+          "validator": validateDecimalNumberFileds,
           "controller": productCpController,
           "decoration": InputDecoration(
             labelText: "Cost Price*",
@@ -198,7 +197,7 @@ class _AddProductState extends State<AddProduct> {
               : null,
         },
         {
-          "validator": validateEmpty,
+          "validator": validateDecimalNumberFileds,
           "controller": productMrpController,
           "decoration": InputDecoration(
             labelText: "MRP*",
@@ -209,7 +208,7 @@ class _AddProductState extends State<AddProduct> {
               : null,
         },
         {
-          "validator": validateEmpty,
+          "validator": validateNonDecimalNumberFileds,
           "controller": productQtyController,
           "decoration": InputDecoration(
             labelText: "Quantity",
@@ -231,14 +230,14 @@ class _AddProductState extends State<AddProduct> {
               : null,
         },
         {
-          "validator": null,
-          "controller": productOffPercentageController,
+          "validator": validateDecimalNumberFileds,
+          "controller": productOffPriceController,
           "decoration": InputDecoration(
-            labelText: "Discount %",
+            labelText: "Discount Price",
           ),
           "keyboardType": TextInputType.number,
           "initialvalue": widget.isUpdateProduct
-              ? widget.prouctDetail.productData.productOffPercentage.toString()
+              ? widget.prouctDetail.productData.productOffPrice.toString()
               : null,
         },
       ];
@@ -536,6 +535,27 @@ class _AddProductState extends State<AddProduct> {
     }
   }
 
+  //Decimal number Validation
+
+  String validateDecimalNumberFileds(String value) {
+    Pattern pattern = r'^[0-9]+(\.[0-9]+)?$';
+    RegExp regex = new RegExp(pattern);
+    if (!regex.hasMatch(value))
+      return 'only digits are allowed';
+    else
+      return null;
+  }
+
+//nonDecimal number Validation
+  String validateNonDecimalNumberFileds(String value) {
+    Pattern pattern = r'^[0-9]*$';
+    RegExp regex = new RegExp(pattern);
+    if (!regex.hasMatch(value))
+      return 'only digits are allowed';
+    else
+      return null;
+  }
+
   next() {
     bool isNextStep = true;
     if (currentStep == 0) {
@@ -749,7 +769,7 @@ class _AddProductState extends State<AddProduct> {
             productDescriptionController.text,
             productMrpController.text,
             productNameController.text,
-            int.parse(productOffPercentageController.text),
+            productOffPriceController.text,
             productQtyController.text,
             productUnitController.text,
             productNetWeightController.text,
@@ -817,7 +837,7 @@ class _AddProductState extends State<AddProduct> {
             productDescriptionController.text,
             productMrpController.text,
             productNameController.text,
-            int.parse(productOffPercentageController.text),
+            productOffPriceController.text,
             productQtyController.text,
             productUnitController.text,
             productNetWeightController.text,

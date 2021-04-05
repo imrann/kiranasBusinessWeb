@@ -35,7 +35,6 @@ Future<void> main() async {
 
   var currentLoggedUser;
   FirebaseAuth auth = FirebaseAuth.instance;
-  print(auth.currentUser.toString());
 
   auth.authStateChanges().listen((User user) {
     if (user == null) {
@@ -49,11 +48,13 @@ Future<void> main() async {
     }
   });
 
+  await Future.delayed(Duration(seconds: 3), () {});
+
   UserDetailsSP().getUserDetails().then((value) {
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 0), () {
       if (currentLoggedUser != null) {
         currentLoggedUser.getIdToken().then((token) {
-          print(token.toString());
+          print("default : Home");
 
           runApp(MyApp("HomePage", value["userName"], value["userPhone"],
               value["userId"]));
@@ -131,16 +132,10 @@ class MyApp extends StatelessWidget {
   }
 
   Widget _getStartupScreens(String redirectPage, BuildContext context) {
-    print(redirectPage);
-
     if (redirectPage == "LoginPage") {
       return Login();
     } else if (redirectPage == "HomePage") {
-      return Home(
-        user: userName.toString(),
-        phone: phone.toString(),
-        userID: userID.toString(),
-      );
+      return Home();
     } else if (redirectPage == "SplashScreen") {
       return Splash();
     }

@@ -27,11 +27,6 @@ Future<dynamic> totalOrdersLength;
 Future<String> image;
 
 class Home extends StatefulWidget {
-  final String user;
-  final String phone;
-  final String userID;
-  Home({this.user, this.phone, this.userID});
-
   @override
   _HomeState createState() => _HomeState();
 }
@@ -146,11 +141,7 @@ class _HomeState extends State<Home> {
       drawer: MediaQuery.of(context).size.width > 800.0
           ? null
           : Drawer(
-              child: DrawerNav(
-                phoneNo: widget.phone,
-                userName: widget.user,
-                userRole: "User",
-              ),
+              child: DrawerNav(),
             ),
       body: WillPopScope(
           onWillPop: _onBackPressed,
@@ -167,11 +158,7 @@ class _HomeState extends State<Home> {
                               color: Colors.white,
                               width: 250,
                               height: MediaQuery.of(context).size.height,
-                              child: DrawerNav(
-                                phoneNo: widget.phone,
-                                userName: widget.user,
-                                userRole: "User",
-                              ),
+                              child: DrawerNav(),
                             )
                           ],
                         ),
@@ -363,7 +350,7 @@ class _HomeState extends State<Home> {
                                         child: Stack(
                                           children: [
                                             new FadeInImage.memoryNetwork(
-                                                fit: BoxFit.fill,
+                                                fit: BoxFit.contain,
                                                 width: double.infinity,
                                                 placeholder: kTransparentImage,
                                                 image: productList[index]

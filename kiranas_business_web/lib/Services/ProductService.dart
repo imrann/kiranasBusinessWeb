@@ -45,7 +45,7 @@ class ProductService {
     List<Product> posts = new List<Product>();
     try {
       http.Response res = await http.get(getAllProductApi, headers: headers);
-      print(res.body);
+
       if (res.statusCode == 200 &&
           jsonDecode(res.body)['message']
               .toString()
